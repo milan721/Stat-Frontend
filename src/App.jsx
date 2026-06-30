@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import Dashboard from './components/Dashboard'
+// the url
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+const API = import.meta.env.VITE_API_URL || 'https://stat-backend-y4mm.onrender.com'
 const REFRESH_INTERVAL = 10_000  // 10 seconds
 
 async function loadAllSheets() {
