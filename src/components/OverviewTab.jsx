@@ -2,7 +2,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LineChart, Line,
 } from 'recharts'
-import { getSpecialistBarData, getPieData, getTimeSeriesData } from '../utils/dataProcessor'
+import { displaySheet, getAllSpecialists, getSpecialistBarData, getPieData, getTimeSeriesData, getUniqueAccountCount } from '../utils/dataProcessor'
 
 const COLORS = ['#6366f1','#06b6d4','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#f97316','#14b8a6','#84cc16']
 
@@ -18,7 +18,7 @@ function StatCard({ label, value, sub }) {
 
 function ChartCard({ title, children, className = '' }) {
   return (
-    <div className={`bg-white rounded-2xl border border-slate-200 shadow-sm p-5 ${className}`}>
+    <div className={`bg-white rounded-2xl border border-slate-200 shadow-sm p-5 overflow-visible ${className}`}>
       <h3 className="text-sm font-semibold text-slate-700 mb-4">{title}</h3>
       {children}
     </div>
@@ -44,17 +44,20 @@ export default function OverviewTab({ data, specialists }) {
   const barData = getSpecialistBarData(data)
   const pieData = getPieData(data)
   const trendData = getTimeSeriesData(data, 'monthly', specialists)
-  const uniqueAccounts = new Set(data.map((r) => r.account)).size
+  const uniqueAccounts = getUniqueAccountCount(data)
+  const uniqueRecords = new Set(data.map((r) => r.rowId)).size
   const sheets = [...new Set(data.map((r) => r.sheet))]
+  const sheetLabels = sheets.map((sheet) => displaySheet(sheet))
+  const specialistList = specialists?.length ? specialists : getAllSpecialists(data)
 
   return (
     <div className="space-y-5">
       {/* Stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Total Accounts" value={data.length} sub="activations in period" />
+        <StatCard label="Total Accounts" value={uniqueRecords} sub="activations in period" />
         <StatCard label="Unique Accounts" value={uniqueAccounts} sub="distinct account names" />
-        <StatCard label="Specialists" value={specialists.length} sub="active in period" />
-        <StatCard label="Sheets" value={sheets.length} sub={sheets.join(', ')} />
+        <StatCard label="Specialists" value={specialistList.length} sub="active in period" />
+        <StatCard label="Sheets" value={sheets.length} sub={sheetLabels.join(', ')} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -104,7 +107,7 @@ export default function OverviewTab({ data, specialists }) {
       </div>
 
       {/* Line: monthly trend */}
-      <ChartCard title="Monthly Trend — Accounts Over Time">
+      <ChartCard title="Monthly Accounts Trend">
         {trendData.length === 0 ? (
           <p className="text-slate-400 text-sm">Not enough data to show a trend.</p>
         ) : (

@@ -1,13 +1,26 @@
 // Sheet display-name overrides
-export const SHEET_DISPLAY = { 'Form Response 1': 'Non DSO' }
-export const displaySheet = (name) => SHEET_DISPLAY[name] || name
+export const SHEET_DISPLAY = {
+  'form response 1':   'Non DSO',
+  'form responses 1':  'Non DSO',
+  'closed':            'Non DSO',
+}
+export const displaySheet = (name) => SHEET_DISPLAY[(name || '').trim().toLowerCase()] || name
 
-const KNOWN = ['jabir', 'milan', 'achu', 'abishek', 'vismaya', 'karthik', 'sidhu']
 export const ALL_SPECIALISTS = ['Jabir', 'Milan', 'Achu', 'Abishek', 'Vismaya', 'Karthik', 'Sidhu']
 export const SPECIALIST_COLORS = {
   Jabir:'#818cf8', Milan:'#38bdf8', Achu:'#34d399', Abishek:'#fbbf24',
   Vismaya:'#f472b6', Karthik:'#a78bfa', Sidhu:'#fb923c', Unknown:'#475569',
 }
+const SPECIALIST_PALETTE = [
+  '#818cf8','#38bdf8','#34d399','#fbbf24','#f472b6',
+  '#a78bfa','#fb923c','#60a5fa','#4ade80','#facc15',
+  '#e879f9','#2dd4bf','#f87171','#c084fc','#86efac',
+]
+const SPECIALIST_STOP_WORDS = new Set([
+  'implementation', 'specialist', 'implementer', 'assigned', 'assignment',
+  'owner', 'consultant', 'agent', 'user', 'person', 'support', 'team',
+  'requested', 'request', 'by', 'unknown', '', 'na', 'n/a', 'none', 'tbd', 'tba', '-'
+])
 
 export const POC_PALETTE = [
   '#f472b6','#34d399','#fbbf24','#38bdf8','#a78bfa',
@@ -19,13 +32,43 @@ export function getPocColor(name, allPocs) {
   return i >= 0 ? POC_PALETTE[i % POC_PALETTE.length] : '#475569'
 }
 
-// Scan a cell for ALL known specialist names
+export function getSpecialistColor(name, allSpecialists = []) {
+  if (SPECIALIST_COLORS[name]) return SPECIALIST_COLORS[name]
+  const i = allSpecialists.indexOf(name)
+  return i >= 0 ? SPECIALIST_PALETTE[i % SPECIALIST_PALETTE.length] : '#475569'
+}
+
+function normalizeLabel(raw) {
+  return (raw || '').trim().replace(/\s+/g, ' ')
+}
+
+function titleCaseName(raw) {
+  return raw
+    .split(' ')
+    .map(word => word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : '')
+    .join(' ')
+}
+
+// Scan a cell for all specialist names, including names not hardcoded elsewhere.
 function extractSpecialists(raw) {
   if (!raw) return ['Unknown']
-  const lower = raw.toLowerCase()
-  const found = KNOWN.filter(s => lower.includes(s))
-  if (found.length === 0) return ['Unknown']
-  return found.map(s => s.charAt(0).toUpperCase() + s.slice(1))
+  const cleaned = normalizeLabel(raw)
+  if (!cleaned) return ['Unknown']
+
+  const withoutPrefix = cleaned.replace(/^(?:implementation\s+)?(?:specialist|implementer|assigned|consultant|owner|agent|user|person)\s*[-:]\s*/i, '')
+  const parts = withoutPrefix
+    .split(/\s*(?:,|&|\/|;|\||\band\b|\s[-–—]\s)\s*/i)
+    .map(part => normalizeLabel(part))
+    .filter(Boolean)
+
+  const out = []
+  parts.forEach(part => {
+    if (SPECIALIST_STOP_WORDS.has(part.toLowerCase())) return
+    const titleCased = titleCaseName(part)
+    if (!out.includes(titleCased)) out.push(titleCased)
+  })
+
+  return out.length ? out : ['Unknown']
 }
 
 // ── Column detection ──────────────────────────────────────────────────────────
@@ -43,7 +86,8 @@ function detectColumns(headers) {
     // 'poc' intentionally removed from specialist search so "Implementation POC" isn't grabbed here
     specialistCol: find('specialist', 'implementer', 'assigned', 'consultant') || find('name', 'user', 'person', 'owner') || headers[0],
     timestampCol:  find('timestamp', 'date', 'time', 'created', 'submitted', 'added') || headers[1],
-    accountCol:    find('account', 'client', 'company', 'organization', 'customer') || headers[2],
+    accountCol:    find('client name/account', 'client name/account name', 'client name / account', 'client name', 'account name', 'account', 'company', 'organization', 'customer') || headers[2],
+    completionCol: find('completion date', 'completed date', 'complete date', 'closed date', 'resolved date', 'completion', 'completed', 'close date', 'resolution date') || null,
     pocCol:        find('implementation poc', 'poc', 'requested by', 'requested') || null,
   }
 }
@@ -73,9 +117,8 @@ function isoWeek(date) {
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
 // ── POC name normalization ────────────────────────────────────────────────────
-// "asif", "Asif Ali", "ASIF ALI" → "Asif"
-// "jayadev j", "Jayadev J", "JAYADEV" → "Jayadev"
-// Uses first-word extraction so variants with suffixes merge automatically.
+// Variants like "asif", "Asif Ali", "ASIF ALI" collapse to "Asif".
+// Variants like "ancy", "ANCY P" collapse to "Ancy".
 
 const NO_POC_VALS = new Set(['n/a', 'na', 'none', 'tbd', 'tba', '-', 'unknown', ''])
 
@@ -84,8 +127,9 @@ function normalizePoc(raw) {
   const trimmed = raw.trim()
   if (!trimmed) return 'Unknown'
   if (NO_POC_VALS.has(trimmed.toLowerCase())) return 'Unknown'
-  const firstWord = trimmed.split(/\s+/)[0]
-  return firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase()
+  const normalized = normalizeLabel(trimmed)
+  const firstToken = normalized.split(' ')[0]
+  return titleCaseName(firstToken)
 }
 
 // ── Normalize ─────────────────────────────────────────────────────────────────
@@ -97,19 +141,23 @@ export function normalizeAllData(rawData) {
   for (const [sheetName, sheetData] of Object.entries(rawData)) {
     const { headers, rows: sheetRows } = sheetData
     if (!headers.length || !sheetRows.length) continue
-    const { specialistCol, timestampCol, accountCol, pocCol } = detectColumns(headers)
+    const { specialistCol, timestampCol, accountCol, completionCol, pocCol } = detectColumns(headers)
 
     sheetRows.forEach((row, rowIdx) => {
       const date = parseDate(row[timestampCol])
       if (!date) return
       const account     = (row[accountCol]    || '').trim() || 'Unknown'
+      const completionDate = completionCol ? parseDate(row[completionCol]) : null
       const poc         = normalizePoc(pocCol ? (row[pocCol] || '') : '')
       const specialists = extractSpecialists((row[specialistCol] || '').trim())
       const rowId       = `${sheetName}||${rowIdx}`   // unique per original spreadsheet row
+      const durationDays = completionDate && completionDate >= date ? (completionDate - date) / 86400000 : null
 
       for (const specialist of specialists) {
         rows.push({
           specialist, poc, date, account,
+          completionDate,
+          durationDays,
           sheet:   sheetName,
           rowId,
           year:    date.getFullYear(),
@@ -143,11 +191,21 @@ export function getAvailableYears(data) {
 
 export function getSpecialistBarData(data) {
   const counts = {}
-  data.forEach(r => { counts[r.specialist] = (counts[r.specialist] || 0) + 1 })
-  return ALL_SPECIALISTS
-    .filter(s => counts[s])
-    .map(s => ({ name: s, count: counts[s] }))
+  data.forEach(r => {
+    if (!r.specialist || r.specialist === 'Unknown') return
+    counts[r.specialist] = (counts[r.specialist] || 0) + 1
+  })
+  return Object.entries(counts)
+    .map(([name, count]) => ({ name, count }))
     .sort((a, b) => b.count - a.count)
+}
+
+export function getAllSpecialists(data) {
+  const names = new Set()
+  data.forEach(r => {
+    if (r.specialist && r.specialist !== 'Unknown') names.add(r.specialist)
+  })
+  return [...names].sort()
 }
 
 export function getPieData(data) {
@@ -237,48 +295,168 @@ export function getTimeSeriesData(data, groupBy) {
 
 // ── Account frequency ─────────────────────────────────────────────────────────
 
-function extractRoot(raw) {
-  let n = raw.trim()
-  n = n.replace(/^IMPORTANT\s*[-:]\s*/i, '').trim()
-  n = n.replace(/\s*:\s*.+$/, '').trim()
-  n = n.replace(/\s+-\s+.+$/, '').trim()
-  return n.replace(/\s+/g, ' ').trim()
+function isDsoAliasSheet(sheetName) {
+  const name = (sheetName || '').toLowerCase()
+  return name.includes('dso') || name.includes('support')
+}
+
+function normalizeAccountName(raw, sheetName) {
+  const cleaned = (raw || '').trim().replace(/\s+/g, ' ')
+  if (!cleaned) return 'Unknown'
+
+  if (!isDsoAliasSheet(sheetName)) return cleaned
+
+  const normalized = cleaned.toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim()
+  const aliases = [
+    { canonical: 'Paradigm', patterns: [/\bparadigm\b/] },
+    { canonical: 'Espire Dental', patterns: [/\bespire\b/] },
+    { canonical: 'Passion Dental', patterns: [/\bpassion\b/] },
+    { canonical: 'Elite Dental Partners', patterns: [/\belite\b/, /\bdental partners\b/] },
+    { canonical: 'Highfive', patterns: [/\bhigh\s*five\b/] },
+    { canonical: 'Bebright', patterns: [/\bbe\s*bright\b/] },
+    { canonical: 'Fuller Smiles', patterns: [/\bfuller\s*smiles\b/] },
+  ]
+
+  for (const { canonical, patterns } of aliases) {
+    if (patterns.some((pattern) => pattern.test(normalized))) return canonical
+  }
+
+  return cleaned
 }
 
 function toKey(name) {
-  return name.toLowerCase().replace(/\s+/g, '')
+  return name.toLowerCase()
 }
 
-export function getAccountFrequencyData(data, limit = 10) {
+function buildAccountFrequencyMap(data) {
   const eventSeen = new Set()
-  const rootMap   = {}
+  const accountMap = {}
 
   data.forEach(r => {
     if (!r.account || r.account === 'Unknown') return
     if (eventSeen.has(r.rowId)) return
     eventSeen.add(r.rowId)
 
-    const root = extractRoot(r.account)
-    const k    = toKey(root)
-    if (!rootMap[k]) rootMap[k] = { display: root, count: 0 }
-    rootMap[k].count += 1
+    const name = normalizeAccountName(r.account, r.sheet)
+    const k = toKey(name)
+    if (!accountMap[k]) accountMap[k] = { display: name, count: 0 }
+    accountMap[k].count += 1
   })
 
-  const entries = Object.entries(rootMap)
-    .map(([k, v]) => ({ k, ...v }))
-    .sort((a, b) => a.k.length - b.k.length)
+  return accountMap
+}
 
-  const merged = {}
-  entries.forEach(({ k, display, count }) => {
-    const parentKey = Object.keys(merged).find(pk =>
-      pk.length >= 5 && k.length > pk.length && k.startsWith(pk)
-    )
-    if (parentKey) merged[parentKey].count += count
-    else merged[k] = { display, count }
-  })
+export function getUniqueAccountCount(data) {
+  return Object.keys(buildAccountFrequencyMap(data)).length
+}
 
-  return Object.values(merged)
+export function getAccountFrequencyData(data, limit = 10) {
+  return Object.values(buildAccountFrequencyMap(data))
     .map(({ display, count }) => ({ account: display, count }))
     .sort((a, b) => b.count - a.count)
     .slice(0, limit)
+}
+
+function formatTimeSeriesData(data, groupBy) {
+  return getTimeSeriesData(data, groupBy).map(({ period, total }) => ({ period, count: total }))
+}
+
+export function getAverageTimeTaken(data) {
+  const seen = new Set()
+  let totalDays = 0
+  let count = 0
+  const MAX_REASONABLE_DURATION_DAYS = 365
+
+  data.forEach(r => {
+    if (!r.rowId || seen.has(r.rowId)) return
+    seen.add(r.rowId)
+    if (!r.completionDate) return
+    if (typeof r.durationDays !== 'number' || Number.isNaN(r.durationDays)) return
+    if (r.durationDays < 0 || r.durationDays > MAX_REASONABLE_DURATION_DAYS) return
+    totalDays += r.durationDays
+    count += 1
+  })
+
+  return count ? totalDays / count : null
+}
+
+export function getSpecialistDetail(data, specialist = 'all') {
+  const filtered = specialist === 'all'
+    ? data
+    : data.filter(r => r.specialist === specialist)
+
+  return {
+    total: new Set(filtered.map(r => r.rowId)).size,
+    accounts: getAccountFrequencyData(filtered, 20),
+    monthly: formatTimeSeriesData(filtered, 'monthly'),
+    quarterly: formatTimeSeriesData(filtered, 'quarterly'),
+    yearly: formatTimeSeriesData(filtered, 'yearly'),
+    weekly: formatTimeSeriesData(filtered, 'weekly'),
+    avgTimeDays: getAverageTimeTaken(filtered),
+  }
+}
+
+function csvEscape(value) {
+  if (value == null) return ''
+  const text = String(value)
+  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text
+}
+
+export function rowsToCsv(rows) {
+  if (!rows?.length) return ''
+  const keys = Array.from(new Set(rows.flatMap((row) => Object.keys(row))))
+  const header = keys.map(csvEscape).join(',')
+  const body = rows.map((row) => keys.map((key) => csvEscape(row[key])).join(',')).join('\n')
+  return `${header}\n${body}`
+}
+
+function formatExportDate(date) {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return ''
+  return date.toISOString().slice(0, 10)
+}
+
+export function formatAnalyticsExportRow(row) {
+  return {
+    sheet: displaySheet(row.sheet),
+    rowId: row.rowId,
+    specialist: row.specialist,
+    poc: row.poc,
+    account: row.account,
+    timestamp: formatExportDate(row.date),
+    completionDate: formatExportDate(row.completionDate),
+    durationDays: row.durationDays == null ? '' : Number(row.durationDays.toFixed(2)),
+    year: row.year,
+    quarter: row.quarter,
+    month: row.month + 1,
+    week: row.week,
+  }
+}
+
+function sanitizeFileNamePart(value) {
+  return String(value || '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-zA-Z0-9._-]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+export function buildExportFileName(prefix, parts = []) {
+  const cleanParts = [prefix, ...parts].map(sanitizeFileNamePart).filter(Boolean)
+  return `${cleanParts.join('_') || 'export'}.csv`
+}
+
+export function downloadCsvFile(fileName, rows) {
+  if (typeof document === 'undefined') return
+  const csv = rowsToCsv(rows)
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = fileName
+  link.style.display = 'none'
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
 }

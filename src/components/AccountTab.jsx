@@ -1,13 +1,13 @@
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts'
-import { getAccountFrequencyData } from '../utils/dataProcessor'
+import { displaySheet, getAccountFrequencyData, getUniqueAccountCount } from '../utils/dataProcessor'
 
 const COLORS = ['#6366f1','#06b6d4','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#f97316','#14b8a6','#84cc16']
 
 function ChartCard({ title, children, className = '' }) {
   return (
-    <div className={`bg-white rounded-2xl border border-slate-200 shadow-sm p-5 ${className}`}>
+    <div className={`bg-white rounded-2xl border border-slate-200 shadow-sm p-5 overflow-visible ${className}`}>
       <h3 className="text-sm font-semibold text-slate-700 mb-4">{title}</h3>
       {children}
     </div>
@@ -31,15 +31,21 @@ const CustomTooltip = ({ active, payload, label }) => {
 export default function AccountTab({ data }) {
   const top20 = getAccountFrequencyData(data, 20)
   const top10 = top20.slice(0, 10)
-  const uniqueAccounts = new Set(data.map((r) => r.account)).size
+  const uniqueAccounts = getUniqueAccountCount(data)
   const uniqueSpecialists = new Set(data.map((r) => r.specialist)).size
+  const uniqueRecords = new Set(data.map((r) => r.rowId)).size
 
   // Accounts by sheet
   const bySheet = {}
+  const seenSheetRows = new Set()
   data.forEach((r) => {
+    const key = `${r.sheet}||${r.rowId}`
+    if (seenSheetRows.has(key)) return
+    seenSheetRows.add(key)
     bySheet[r.sheet] = (bySheet[r.sheet] || 0) + 1
   })
-  const sheetData = Object.entries(bySheet).map(([sheet, count]) => ({ sheet, count }))
+  const sheetData = Object.entries(bySheet)
+    .map(([sheet, count]) => ({ sheet: displaySheet(sheet), count }))
 
   return (
     <div className="space-y-5">
@@ -47,7 +53,7 @@ export default function AccountTab({ data }) {
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
           <p className="text-sm text-slate-500 font-medium">Total Records</p>
-          <p className="text-3xl font-bold text-slate-800 mt-1">{data.length}</p>
+          <p className="text-3xl font-bold text-slate-800 mt-1">{uniqueRecords}</p>
         </div>
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
           <p className="text-sm text-slate-500 font-medium">Unique Accounts</p>
@@ -100,7 +106,7 @@ export default function AccountTab({ data }) {
       {/* Full account table */}
       <ChartCard title={`All Accounts (Top ${top20.length})`}>
         {top20.length === 0 ? (
-          <p className="text-slate-400 text-sm">No data.</p>
+          <p className="text-slate-400 text-sm">No data</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -119,7 +125,7 @@ export default function AccountTab({ data }) {
                     <td className="py-2 px-3 text-slate-700 font-medium">{row.account}</td>
                     <td className="py-2 px-3 text-right font-bold text-indigo-600">{row.count}</td>
                     <td className="py-2 px-3 text-right text-slate-500">
-                      {data.length ? ((row.count / data.length) * 100).toFixed(1) : 0}%
+                      {uniqueRecords ? ((row.count / uniqueRecords) * 100).toFixed(1) : 0}%
                     </td>
                   </tr>
                 ))}

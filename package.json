@@ -10,11 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "axios": "^1.18.1",
-    "cors": "^2.8.6",
-    "date-fns": "^4.4.0",
-    "express": "^5.2.1",
-    "googleapis": "^173.0.0",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "recharts": "^3.9.0"

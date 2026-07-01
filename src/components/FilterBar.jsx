@@ -21,7 +21,7 @@ const selectStyle = {
 export default function FilterBar({ filters, onUpdate, years }) {
   return (
     <div
-      className="flex flex-wrap items-center gap-3 px-5 py-3.5 rounded-2xl"
+      className="flex flex-col lg:flex-row lg:flex-wrap lg:items-center gap-3 px-4 sm:px-5 py-3.5 rounded-2xl"
       style={{
         background: 'rgba(255,255,255,0.04)',
         border: '1px solid rgba(255,255,255,0.08)',
@@ -33,12 +33,12 @@ export default function FilterBar({ filters, onUpdate, years }) {
       </span>
 
       {/* Period pills */}
-      <div className="flex gap-0.5 p-1 rounded-xl" style={{ background: 'rgba(0,0,0,0.25)' }}>
+      <div className="flex flex-wrap gap-0.5 p-1 rounded-xl w-fit max-w-full" style={{ background: 'rgba(0,0,0,0.25)' }}>
         {PERIODS.map(p => (
           <button
             key={p.key}
             onClick={() => onUpdate('period', p.key)}
-            className="px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all"
+            className="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all"
             style={
               filters.period === p.key
                 ? { background: 'rgba(255,255,255,0.14)', color: 'white' }
@@ -52,25 +52,25 @@ export default function FilterBar({ filters, onUpdate, years }) {
 
       {/* Conditional dropdowns */}
       {filters.period !== 'all' && years.length > 0 && (
-        <select value={filters.year} onChange={e => onUpdate('year', Number(e.target.value))} style={selectStyle}>
+        <select className="w-full sm:w-auto" value={filters.year} onChange={e => onUpdate('year', Number(e.target.value))} style={selectStyle}>
           {years.map(y => <option key={y} value={y} style={{ background: '#1e1b4b' }}>{y}</option>)}
         </select>
       )}
 
       {filters.period === 'quarter' && (
-        <select value={filters.quarter} onChange={e => onUpdate('quarter', Number(e.target.value))} style={selectStyle}>
+        <select className="w-full sm:w-auto" value={filters.quarter} onChange={e => onUpdate('quarter', Number(e.target.value))} style={selectStyle}>
           {[1,2,3,4].map(q => <option key={q} value={q} style={{ background: '#1e1b4b' }}>Q{q}</option>)}
         </select>
       )}
 
       {filters.period === 'month' && (
-        <select value={filters.month} onChange={e => onUpdate('month', Number(e.target.value))} style={selectStyle}>
+        <select className="w-full sm:w-auto" value={filters.month} onChange={e => onUpdate('month', Number(e.target.value))} style={selectStyle}>
           {MONTHS.map((m, i) => <option key={i} value={i} style={{ background: '#1e1b4b' }}>{m}</option>)}
         </select>
       )}
 
       {filters.period === 'week' && (
-        <select value={filters.week} onChange={e => onUpdate('week', Number(e.target.value))} style={selectStyle}>
+        <select className="w-full sm:w-auto" value={filters.week} onChange={e => onUpdate('week', Number(e.target.value))} style={selectStyle}>
           {Array.from({ length: 52 }, (_, i) => (
             <option key={i+1} value={i+1} style={{ background: '#1e1b4b' }}>Week {i+1}</option>
           ))}
