@@ -8,7 +8,7 @@ import {
   getAllSpecialists, getSpecialistColor,
   getPocBarData, getAllPocs, getPocColor,
   displaySheet,
-  formatAnalyticsExportRow,
+  // formatAnalyticsExportRow,
 } from '../utils/dataProcessor'
 import useIsMobile from '../hooks/useIsMobile'
 import {
@@ -17,11 +17,11 @@ import {
   table, tableReserve,
 } from '../utils/pdfExport'
 
-const ROW_COLUMNS = [
-  ['sheet', 'Sheet'], ['rowId', 'Row ID'], ['specialist', 'Specialist'], ['poc', 'POC'],
-  ['account', 'Account'], ['timestamp', 'Date'], ['completionDate', 'Completed'],
-  ['durationDays', 'Duration (d)'], ['year', 'Year'], ['quarter', 'Quarter'], ['month', 'Month'], ['week', 'Week'],
-]
+// const ROW_COLUMNS = [
+//   ['sheet', 'Sheet'], ['rowId', 'Row ID'], ['specialist', 'Specialist'], ['poc', 'POC'],
+//   ['account', 'Account'], ['timestamp', 'Date'], ['completionDate', 'Completed'],
+//   ['durationDays', 'Duration (d)'], ['year', 'Year'], ['quarter', 'Quarter'], ['month', 'Month'], ['week', 'Week'],
+// ]
 
 const SHEET_ACCENTS = [
   { a: '#6366f1', b: '#8b5cf6' },
@@ -168,9 +168,9 @@ export default function AllView({ data, sheets, viewMode }) {
       y = addImageBlock(doc, y, topAccountsCanvas)
       y = table(doc, y, ['Account', 'Locations'], topAccountsRows)
 
-      const rows = data.map(formatAnalyticsExportRow)
-      y = sectionTitle(doc, y + 2, `All Rows (${rows.length})`)
-      table(doc, y, ROW_COLUMNS.map(([, label]) => label), rows.map(r => ROW_COLUMNS.map(([key]) => r[key] ?? '')))
+      // const rows = data.map(formatAnalyticsExportRow)
+      // y = sectionTitle(doc, y + 2, `All Rows (${rows.length})`)
+      // table(doc, y, ROW_COLUMNS.map(([, label]) => label), rows.map(r => ROW_COLUMNS.map(([key]) => r[key] ?? '')))
 
       downloadPdf(doc, buildExportFileName('implementation-analytics', [viewMode, 'full-report']))
     } finally {
