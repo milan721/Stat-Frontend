@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf'
-// import autoTable from 'jspdf-autotable'
+import autoTable from 'jspdf-autotable'
 
 // Mirrors the header gradient used across the dashboard (HEADER_BG in Dashboard.jsx)
 const HEADER_FROM = [55, 48, 163]   // #3730a3
@@ -415,31 +415,31 @@ export function addImageBlock(doc, y, canvas, opts = {}) {
 // multiple pages on their own via autoTable's pagination — willDrawPage repaints the
 // dark background on each genuinely new page it adds, without touching the page the
 // table started on (which may already have earlier report sections drawn above it).
-// export function table(doc, y, head, body, opts = {}) {
-//   y = ensureSpace(doc, y, opts.reserve ?? 20)
-//   const startPage = doc.internal.getNumberOfPages()
-//   autoTable(doc, {
-//     startY: y,
-//     head: [head],
-//     body,
-//     margin: { left: MARGIN, right: MARGIN, top: 14 },
-//     styles: { fontSize: 8, cellPadding: 2, textColor: [222, 222, 235], lineColor: [45, 48, 78], lineWidth: 0.1 },
-//     headStyles: { fillColor: HEADER_FROM, textColor: 255, fontStyle: 'bold' },
-//     bodyStyles: { fillColor: [15, 18, 40] },
-//     alternateRowStyles: { fillColor: [21, 24, 50] },
-//     columnStyles: opts.columnStyles,
-//     willDrawPage: () => {
-//       if (doc.internal.getCurrentPageInfo().pageNumber > startPage) fillPageBg(doc)
-//     },
-//   })
-//   return doc.lastAutoTable.finalY + 6
-// }
+export function table(doc, y, head, body, opts = {}) {
+  y = ensureSpace(doc, y, opts.reserve ?? 20)
+  const startPage = doc.internal.getNumberOfPages()
+  autoTable(doc, {
+    startY: y,
+    head: [head],
+    body,
+    margin: { left: MARGIN, right: MARGIN, top: 14 },
+    styles: { fontSize: 8, cellPadding: 2, textColor: [222, 222, 235], lineColor: [45, 48, 78], lineWidth: 0.1 },
+    headStyles: { fillColor: HEADER_FROM, textColor: 255, fontStyle: 'bold' },
+    bodyStyles: { fillColor: [15, 18, 40] },
+    alternateRowStyles: { fillColor: [21, 24, 50] },
+    columnStyles: opts.columnStyles,
+    willDrawPage: () => {
+      if (doc.internal.getCurrentPageInfo().pageNumber > startPage) fillPageBg(doc)
+    },
+  })
+  return doc.lastAutoTable.finalY + 6
+}
 
 // Height estimate used to reserve space for a table alongside its heading, so the
 // heading and at least the header row + a couple of data rows stay together.
-// export function tableReserve(nRows) {
-//   return 14 + Math.min(nRows, 3) * 6
-// }
+export function tableReserve(nRows) {
+  return 14 + Math.min(nRows, 3) * 6
+}
 
 export function downloadPdf(doc, fileName) {
   doc.save(fileName)
