@@ -293,7 +293,7 @@ export default function AllView({ data, sheets, viewMode }) {
       ) : (
         specTotals.length > 0 && (
           <div className="rounded-2xl p-5" style={glass}>
-            <p className="text-sm font-semibold text-white/80 mb-1">All Specialists: Combined Total</p>
+            <p className="text-sm font-semibold text-white/80 mb-1">All Specialists: Combined Total By Location</p>
             <p className="text-xs mb-5" style={{ color: 'rgba(255,255,255,0.3)' }}>
               Across all sheets for the selected time period
             </p>
