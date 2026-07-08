@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf'
-import autoTable from 'jspdf-autotable'
+// import autoTable from 'jspdf-autotable'
 
 // Mirrors the header gradient used across the dashboard (HEADER_BG in Dashboard.jsx)
 const HEADER_FROM = [55, 48, 163]   // #3730a3
