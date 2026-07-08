@@ -8,13 +8,15 @@ import {
   getSpecialistBarData, getPieData, getTimeSeriesData, getAccountFrequencyData, getUniqueAccountCount, getAverageTimeTaken,
   getPocBarData, getPocPieData, getAllPocs, getPocColor,
   getSpecialistPocBreakdown, POC_PALETTE, displaySheet,
-  formatAnalyticsExportRow,
+  // formatAnalyticsExportRow,
 } from '../utils/dataProcessor'
 import useIsMobile from '../hooks/useIsMobile'
 import {
   buildExportFileName, downloadPdf, newReport,
   sectionTitle, kpiGrid, kpiGridHeight, barChartCanvas, pieChartCanvas, lineChartCanvas,
-  addImageBlock, imageHeightMM, table, tableReserve,
+  addImageBlock, imageHeightMM, 
+  // table, 
+  tableReserve,
 } from '../utils/pdfExport'
 
 const truncateLabel = (max) => (v) => (v && v.length > max ? `${v.slice(0, max - 1)}…` : v)
@@ -215,9 +217,9 @@ export default function SheetView({ data, sheetName, viewMode }) {
         y = table(doc, y, ['Specialist', 'POC', 'Count'], pocRows)
       }
 
-      const rows = filtered.map(formatAnalyticsExportRow)
-      y = sectionTitle(doc, y + 2, `All Rows (${rows.length})`)
-      table(doc, y, ROW_COLUMNS.map(([, label]) => label), rows.map(r => ROW_COLUMNS.map(([key]) => r[key] ?? '')))
+      // const rows = filtered.map(formatAnalyticsExportRow)
+      // y = sectionTitle(doc, y + 2, `All Rows (${rows.length})`)
+      // table(doc, y, ROW_COLUMNS.map(([, label]) => label), rows.map(r => ROW_COLUMNS.map(([key]) => r[key] ?? '')))
 
       downloadPdf(doc, buildExportFileName('implementation-analytics', [...fileParts, 'full-report']))
     } finally {
