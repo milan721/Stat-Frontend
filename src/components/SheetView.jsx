@@ -21,11 +21,11 @@ import {
 
 const truncateLabel = (max) => (v) => (v && v.length > max ? `${v.slice(0, max - 1)}…` : v)
 
-const ROW_COLUMNS = [
-  ['sheet', 'Sheet'], ['rowId', 'Row ID'], ['specialist', 'Specialist'], ['poc', 'POC'],
-  ['account', 'Account'], ['timestamp', 'Date'], ['completionDate', 'Completed'],
-  ['durationDays', 'Duration (d)'], ['year', 'Year'], ['quarter', 'Quarter'], ['month', 'Month'], ['week', 'Week'],
-]
+// const ROW_COLUMNS = [
+//   ['sheet', 'Sheet'], ['rowId', 'Row ID'], ['specialist', 'Specialist'], ['poc', 'POC'],
+//   ['account', 'Account'], ['timestamp', 'Date'], ['completionDate', 'Completed'],
+//   ['durationDays', 'Duration (d)'], ['year', 'Year'], ['quarter', 'Quarter'], ['month', 'Month'], ['week', 'Week'],
+// ]
 
 const glass = {
   background: 'rgba(255,255,255,0.04)',
