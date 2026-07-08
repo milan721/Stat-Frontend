@@ -49,14 +49,11 @@ export default function Dashboard({ rawData, onRefresh, lastSync }) {
 
           {/* Logo + title */}
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
-              style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)' }}>
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
+            <div className="rounded-xl px-2.5 py-1.5 flex items-center shrink-0"
+              style={{ background: 'rgba(255,255,255,0.92)' }}>
+              <img src="/voicestack-logo.svg" alt="VoiceStack" className="h-5 sm:h-6 w-auto" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 border-l border-white/20 pl-3">
               <h1 className="text-lg sm:text-xl font-bold text-white leading-none tracking-tight truncate">Implementation Analytics</h1>
               <p className="text-indigo-300 text-xs mt-0.5 font-medium break-words">
                 {uniqueEntries.toLocaleString()} entries · {sheets.length} sheets

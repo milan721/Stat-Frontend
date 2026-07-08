@@ -1,12 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none">
-  <defs>
-    <radialGradient id="glossy" cx="38%" cy="32%" r="65%">
-      <stop offset="0%" stop-color="#ffb3b3"/>
-      <stop offset="25%" stop-color="#ff4d4d"/>
-      <stop offset="70%" stop-color="#d90429"/>
-      <stop offset="100%" stop-color="#7a0012"/>
-    </radialGradient>
-  </defs>
-  <circle cx="24" cy="24" r="20" fill="url(#glossy)"/>
-  <ellipse cx="18" cy="15" rx="7" ry="4.5" fill="#ffffff" opacity="0.55"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26" fill="none">
+<rect width="26" height="26" rx="5.2" fill="#4A3CE1"/>
+<g clip-path="url(#clip0_favicon)">
+<path d="M20.9661 6.83447C21.3059 6.83447 21.5181 7.20249 21.348 7.49662L19.565 10.5785C19.4336 10.8057 19.191 10.9456 18.9285 10.9456H14.6025L16.7653 7.20197C16.8966 6.97455 17.1394 6.83447 17.402 6.83447H20.9661Z" fill="white"/>
+<path d="M16.2125 15.0567C16.5522 15.0567 16.7645 15.4246 16.5944 15.7187L14.7296 18.944C14.6507 19.0804 14.5052 19.1644 14.3476 19.1644H10.1065C9.94903 19.1644 9.80353 19.0805 9.72464 18.9442L7.47367 15.0567L5.22614 11.1663C5.14724 11.0297 5.14724 10.8614 5.22614 10.7249L7.34628 7.05497C7.42511 6.91852 7.57073 6.83447 7.72832 6.83447H11.4627C11.8024 6.83447 12.0147 7.20225 11.8447 7.49639L9.9796 10.7249C9.90071 10.8614 9.90071 11.0297 9.9796 11.1663L12.0997 14.8362C12.1786 14.9726 12.3242 15.0567 12.4818 15.0567H16.2125Z" fill="white"/>
+</g>
+<defs>
+<clipPath id="clip0_favicon">
+<rect width="16.632" height="12.3299" fill="white" transform="translate(5.09912 6.83496)"/>
+</clipPath>
+</defs>
 </svg>
