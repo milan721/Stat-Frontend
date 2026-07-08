@@ -49,10 +49,7 @@ export default function Dashboard({ rawData, onRefresh, lastSync }) {
 
           {/* Logo + title */}
           <div className="flex items-center gap-3 min-w-0">
-            <div className="rounded-xl px-2.5 py-1.5 flex items-center shrink-0"
-              style={{ background: 'rgba(255,255,255,0.92)' }}>
-              <img src="/voicestack-logo.svg" alt="VoiceStack" className="h-5 sm:h-6 w-auto" />
-            </div>
+            <img src="/voicestack-logo-light.svg" alt="VoiceStack" className="h-6 sm:h-7 w-auto shrink-0" />
             <div className="min-w-0 border-l border-white/20 pl-3">
               <h1 className="text-lg sm:text-xl font-bold text-white leading-none tracking-tight truncate">Implementation Analytics</h1>
               <p className="text-indigo-300 text-xs mt-0.5 font-medium break-words">
