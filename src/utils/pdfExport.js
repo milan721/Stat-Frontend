@@ -437,9 +437,9 @@ export function addImageBlock(doc, y, canvas, opts = {}) {
 
 // Height estimate used to reserve space for a table alongside its heading, so the
 // heading and at least the header row + a couple of data rows stay together.
-export function tableReserve(nRows) {
-  return 14 + Math.min(nRows, 3) * 6
-}
+// export function tableReserve(nRows) {
+//   return 14 + Math.min(nRows, 3) * 6
+// }
 
 export function downloadPdf(doc, fileName) {
   doc.save(fileName)
