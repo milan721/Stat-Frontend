@@ -14,9 +14,7 @@ import useIsMobile from '../hooks/useIsMobile'
 import {
   buildExportFileName, downloadPdf, newReport,
   sectionTitle, kpiGrid, kpiGridHeight, barChartCanvas, pieChartCanvas, lineChartCanvas,
-  addImageBlock, imageHeightMM, 
-  // table, 
-  tableReserve,
+  addImageBlock, imageHeightMM, table, tableReserve,
 } from '../utils/pdfExport'
 
 const truncateLabel = (max) => (v) => (v && v.length > max ? `${v.slice(0, max - 1)}…` : v)

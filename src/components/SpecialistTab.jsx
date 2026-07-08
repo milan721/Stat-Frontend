@@ -3,7 +3,9 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line, Cell,
 } from 'recharts'
-import { getAllSpecialists, getSpecialistDetail, buildExportFileName, downloadCsvFile, formatAnalyticsExportRow } from '../utils/dataProcessor'
+import { getAllSpecialists, getSpecialistDetail, buildExportFileName, downloadCsvFile, 
+  // formatAnalyticsExportRow 
+} from '../utils/dataProcessor'
 
 const COLORS = ['#6366f1','#06b6d4','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#f97316','#14b8a6','#84cc16']
 
@@ -66,12 +68,12 @@ export default function SpecialistTab({ data, allData, specialists }) {
   const countMonth = baseData.filter((r) => r.year === thisYear && r.month === thisMonth).length
   const countQuarter = baseData.filter((r) => r.year === thisYear && r.quarter === thisQuarter).length
 
-  const exportRows = () => {
-    downloadCsvFile(
-      buildExportFileName('implementation-analytics', ['specialist', selected === 'all' ? 'all-specialists' : selected, 'rows']),
-      baseData.map(formatAnalyticsExportRow)
-    )
-  }
+  // const exportRows = () => {
+  //   downloadCsvFile(
+  //     buildExportFileName('implementation-analytics', ['specialist', selected === 'all' ? 'all-specialists' : selected, 'rows']),
+  //     baseData.map(formatAnalyticsExportRow)
+  //   )
+  // }
 
   const exportSummary = () => {
     const summaryRows = [
